@@ -36,6 +36,10 @@ local Weather = WidgetContainer:new{
     default_api_key = "2eec368fb9a149dd8a4224549212507",
     default_temp_scale = "C",
     default_clock_style = "12",
+    default_speed_units = "kph",
+    default_pressure_units = "mb",
+    default_precip_units = "mm",
+    default_distance_units = "km",
     composer = nil,
     kv = {}
 }
@@ -59,10 +63,18 @@ function Weather:loadSettings()
    self.api_key = self.settings:readSetting("api_key") or self.default_api_key
    self.temp_scale = self.settings:readSetting("temp_scale") or self.default_temp_scale
    self.clock_style = self.settings:readSetting("clock_style") or self.default_clock_style
+   self.speed_units = self.settings:readSetting("speed_units") or self.default_speed_units
+   self.precip_units = self.settings:readSetting("precip_units") or self.default_precip_units
+   self.pressure_units = self.settings:readSetting("pressure_units") or self.default_pressure_units
+   self.distance_units = self.settings:readSetting("distance_units") or self.default_distance_units
    -- Pollinate the other objects that require settings
    self.composer = Composer:new{
       temp_scale = self.temp_scale,
-      clock_style = self.clock_style
+      clock_style = self.clock_style,
+      speed_units = self.speed_units,
+      pressure_units = self.pressure_units,
+      precip_units = self.precip_units,
+      distance_units = self.distance_units,
    }
 end
 --
@@ -167,10 +179,9 @@ function Weather:getSubMenuItems()
                end,
             },
             {
-               -- There is a bug here. After the callback fires, and the user leaves
-               -- the sub_item_table, the parent menu doesn't reflect the updated setting
-               -- Try it... you'll see :(
-               text = T(_("Temperature Scale (%1)"), self.temp_scale),
+               text_func = function()
+                 return T(_("Temperature Scale (%1)"), self.temp_scale)
+               end,
                sub_item_table = {
                   {
                      text = _("Celsius"),
@@ -203,7 +214,9 @@ function Weather:getSubMenuItems()
                }
             },
             {
-               text = T(_("Clock style (%1)"), self.clock_style),
+               text_func = function()
+                 return T(_("Clock style (%1)"), self.clock_style)
+               end,
                sub_item_table = {
                   {
                      text = _("12 hour clock"),
@@ -234,7 +247,147 @@ function Weather:getSubMenuItems()
                      end,
                   }
                }
-            }
+            },
+            {
+              text_func = function()
+                return T(_("Wind speed units (%1)"), self.speed_units)
+              end,
+              sub_item_table = {
+                {
+                  text = _("Kilometers per hour"),
+                  checked_func = function()
+                    if(string.find(self.speed_units,"kph")) then
+                      return true
+                    else
+                      return false
+                    end
+                  end,
+                  keep_menu_open = true,
+                  callback = function()
+                    self.speed_units = "kph"
+                  end,
+                },
+                {
+                  text = _("Miles per hour"),
+                  checked_func = function()
+                    if(string.find(self.speed_units,"mph")) then
+                      return true
+                    else
+                      return false
+                    end
+                  end,
+                  keep_menu_open = true,
+                  callback = function(touchmenu_instance)
+                    self.speed_units = "mph"
+                  end,
+                }
+              }
+            },
+            {
+              text_func = function()
+                return T(_("Atmospheric pressure units (%1)"), self.pressure_units)
+              end,
+              sub_item_table = {
+                {
+                  text = _("Millibars"),
+                  checked_func = function()
+                    if(string.find(self.pressure_units,"mb")) then
+                      return true
+                    else
+                      return false
+                    end
+                  end,
+                  keep_menu_open = true,
+                  callback = function()
+                    self.pressure_units = "mb"
+                  end,
+                },
+                {
+                  text = _("Height of mercury column in inches"),
+                  checked_func = function()
+                    if(string.find(self.pressure_units,"in")) then
+                      return true
+                    else
+                      return false
+                    end
+                  end,
+                  keep_menu_open = true,
+                  callback = function(touchmenu_instance)
+                    self.pressure_units = "in"
+                  end,
+                }
+              }
+            },
+            {
+              text_func = function()
+                return T(_("Precipitation units (%1)"), self.precip_units)
+              end,
+              sub_item_table = {
+                {
+                  text = _("Height of column of water in millimeters"),
+                  checked_func = function()
+                    if(string.find(self.precip_units,"mm")) then
+                      return true
+                    else
+                      return false
+                    end
+                  end,
+                  keep_menu_open = true,
+                  callback = function()
+                    self.precip_units = "mm"
+                  end,
+                },
+                {
+                  text = _("Height of column of water in inches"),
+                  checked_func = function()
+                    if(string.find(self.precip_units,"in")) then
+                      return true
+                    else
+                      return false
+                    end
+                  end,
+                  keep_menu_open = true,
+                  callback = function(touchmenu_instance)
+                    self.precip_units = "in"
+                  end,
+                }
+              }
+            },
+            {
+              text_func = function()
+                return T(_("Visibility distance units (%1)"), self.distance_units)
+              end,
+              sub_item_table = {
+                {
+                  text = _("Kilometers"),
+                  checked_func = function()
+                    if(string.find(self.distance_units,"km")) then
+                      return true
+                    else
+                      return false
+                    end
+                  end,
+                  keep_menu_open = true,
+                  callback = function()
+                    self.distance_units = "km"
+                  end,
+                },
+                {
+                  text = _("Miles"),
+                  checked_func = function()
+                    if(string.find(self.distance_units,"mi")) then
+                      return true
+                    else
+                      return false
+                    end
+                  end,
+                  keep_menu_open = true,
+                  callback = function(touchmenu_instance)
+                    self.distance_units = "mi"
+                  end,
+                }
+              }
+            },
          },
       },
 --[[      {
@@ -438,6 +591,10 @@ function Weather:onFlushSettings()
       self.settings:saveSetting("api_key", self.api_key)
       self.settings:saveSetting("temp_scale", self.temp_scale)
       self.settings:saveSetting("clock_style", self.clock_style)
+      self.settings:saveSetting("speed_units", self.speed_units)
+      self.settings:saveSetting("pressure_units", self.pressure_units)
+      self.settings:saveSetting("precip_units", self.precip_units)
+      self.settings:saveSetting("distance_units", self.distance_units)
       self.settings:flush()
    end
 end

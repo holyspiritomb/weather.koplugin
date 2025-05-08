@@ -3,7 +3,11 @@ local _ = require('gettext')
 
 local Composer = {
    temp_scale = "C",
-   clock_style = "12"
+   clock_style = "12",
+   speed_units = "kph",
+   pressure_units = "mb",
+   precip_units = "mm",
+   distance_units = "km"
 }
 
 function Composer:new(o)
@@ -15,6 +19,22 @@ end
 
 function Composer:setTempScale(temp_scale)
    self.temp_scale = temp_scale
+end
+
+function Composer:setSpeedUnits(speed_units)
+   self.speed_units = speed_units
+end
+
+function Composer:setPressureUnits(pressure_units)
+   self.pressure_units = pressure_units
+end
+
+function Composer:setPrecipUnits(precip_units)
+   self.precip_units = precip_units
+end
+
+function Composer:setDistanceUnits(distance_units)
+   self.distance_units = distance_units
 end
 
 function Composer:setClockStyle(clock_style)
@@ -29,15 +49,31 @@ function Composer:createCurrentForecast(data)
    local view_content = {}
 
    local condition = data.condition.text
+   local humidity = data.humidity .. "%"
    local feelslike
+   local current_temp
+   local dewpoint
    
    if(string.find(self.temp_scale, "C")) then
       feelslike = data.feelslike_c .. " °C"
+      current_temp = data.temp_c .. " °C"
+      dewpoint = data.dewpoint_c .. " °C"
    else
       feelslike = data.feelslike_f .. " °F"
+      current_temp = data.temp_f .. " °F"
+      dewpoint = data.dewpoint_f .. " °F"
    end
    
    view_content = {
+      {
+         "Current temperature ", current_temp
+      },
+      {
+         "Current humidity ", humidity
+      },
+      {
+         "Current dew point ", dewpoint
+      },
       {
          "Currently feels like ", feelslike
       },
@@ -130,9 +166,9 @@ function Composer:hourlyView(data, callback)
       local time
 
       if(string.find(self.temp_scale, "C")) then
-         cell = hourly_forecast[i+1].feelslike_c .. "°C, "
+         cell = hourly_forecast[i+1].temp_c .. "°C, "
       else
-         cell = hourly_forecast[i+1].feelslike_f .. "°F, "
+         cell = hourly_forecast[i+1].temp_f .. "°F, "
       end
 
       if(string.find(self.clock_style, "12")) then
@@ -179,11 +215,15 @@ function Composer:forecastForHour(data)
    local temp
    local precip
    local wind
+   local gust
+   local pressure
+   local vis
    
-   local humidity = data.humidity
+   local humidity = data.humidity .. "%"
    local time = data.time
    local condition = data.condition.text
    local uv = data.uv
+   local cloud = data.cloud .. "%"
 
    if(string.find(self.temp_scale,"C")) then
       feelslike = data.feelslike_c .. "°C"
@@ -191,18 +231,40 @@ function Composer:forecastForHour(data)
       heatindex = data.heatindex_c .. "°C"
       dewpoint = data.dewpoint_c .. "°C"
       temp = data.temp_c .. "°C"
-      precip = data.precip_mm .. " mm"
-      wind = data.wind_kph .. " KPH"
    else
       feelslike = data.feelslike_f .. "°F"
       windchill = data.windchill_f .. "°F"
       heatindex = data.heatindex_f .. "°F"
       dewpoint = data.dewpoint_f .. "°F"
       temp = data.temp_f .. "°F"
-      precip = data.precip_in .. " in"
-      wind = data.wind_mph  .. " MPH"
+   end
+
+   if(string.find(self.speed_units,"kph")) then
+     wind = data.wind_kph .. " kph " .. data.wind_dir
+     gust = data.gust_kph .. " kph"
+   else
+     wind = data.wind_mph  .. " mph " .. data.wind_dir
+     gust = data.gust_mph  .. " mph"
    end
    
+   if(string.find(self.pressure_units,"mb")) then
+     pressure = data.pressure_mb .. " mb"
+   else
+     pressure = data.pressure_in .. " in"
+   end
+   
+   if(string.find(self.distance_units,"km")) then
+     vis = data.vis_km .. " km"
+   else
+     vis = data.vis_miles .. " mi"
+   end
+
+   if(string.find(self.precip_units, "mm")) then
+     precip = data.precip_mm .. " mm"
+   else
+     precip = data.precip_in .. " in"
+   end
+
    view_content =
       {
          {
@@ -222,7 +284,16 @@ function Composer:forecastForHour(data)
             "Precipitation", precip
          },
          {
+            "Visibility", vis
+         },
+         {
             "Wind", wind
+         },
+         {
+            "Gusts", gust
+         },
+         {
+            "Humidity", humidity
          },
          {
             "Dewpoint", dewpoint
@@ -235,6 +306,9 @@ function Composer:forecastForHour(data)
             "Wind chill", windchill
          },
          "---",
+         {
+            "Cloud cover", cloud
+         },
          {
             "UV", uv
          }
@@ -253,9 +327,19 @@ function Composer:createWeeklyForecast(data, callback)
    for _, r in ipairs(data.forecast.forecastday) do
       local date = r.date
       local condition = r.day.condition.text
-      local avg_temp_c = r.day.avgtemp_c
-      local max_c = r.day.maxtemp_c
-      local min_c = r.day.mintemp_c
+      local avg_temp
+      local max_temp
+      local min_temp
+
+      if(string.find(self.temp_scale,"C")) then
+        min_temp = r.day.mintemp_c .. "°C"
+        max_temp = r.day.maxtemp_c .. "°C"
+        avg_temp = r.day.avgtemp_c .. "°C"
+      else
+        min_temp = r.day.mintemp_f .. "°F"
+        max_temp = r.day.maxtemp_f .. "°F"
+        avg_temp = r.day.avgtemp_f .. "°F"
+      end
 
       -- @todo: Figure out why os returns the wrong date!
       -- local day = os.date("%A", r.date_epoch)
@@ -271,10 +355,10 @@ function Composer:createWeeklyForecast(data, callback)
             date, condition
          },
          {
-            "", avg_temp_c
+            "", "Average: " .. avg_temp
          },
          {
-            "", "High: " .. max_c .. ", Low: " .. min_c
+            "", "High: " .. max_temp .. ", Low: " .. min_temp
          },
          {
             "",
