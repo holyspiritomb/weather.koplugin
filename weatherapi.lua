@@ -54,7 +54,7 @@ function WeatherApi:_makeRequest(url)
     end
 end
 --
--- 
+--
 --
 -- @returns table of forecast
 --
@@ -67,7 +67,7 @@ function WeatherApi:getForecast(forecast_days, postal_code)
       self.api_key,
       postal_code,
       forecast_days
-   )  
+   )
    -- Make the request
    local result = self:_makeRequest(url)
    -- Check to see if the result is empty

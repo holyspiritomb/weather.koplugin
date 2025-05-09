@@ -1,4 +1,4 @@
-local logger = require('logger') 
+local logger = require('logger')
 local _ = require('gettext')
 
 local Composer = {
@@ -53,7 +53,7 @@ function Composer:createCurrentForecast(data)
    local feelslike
    local current_temp
    local dewpoint
-   
+
    if(string.find(self.temp_scale, "C")) then
       feelslike = data.feelslike_c .. " °C"
       current_temp = data.temp_c .. " °C"
@@ -63,7 +63,7 @@ function Composer:createCurrentForecast(data)
       current_temp = data.temp_f .. " °F"
       dewpoint = data.dewpoint_f .. " °F"
    end
-   
+
    view_content = {
       {
          "Current temperature ", current_temp
@@ -87,22 +87,22 @@ function Composer:createCurrentForecast(data)
 end
 --
 -- Takes data.forecast.forecastday
--- 
+--
 function Composer:createForecastFromDay(data)
-   local view_content = {}   
+   local view_content = {}
    -- The values I'm interested in seeing
    local date = data.date
    local condition = data.day.condition.text
    local avg_temp
    local max_temp
-   local min_temp  
+   local min_temp
    local uv = data.day.uv
    local moon_phase = data.astro.moon_phase .. ", " .. data.astro.moon_illumination .. "%"
    local moon_rise = data.astro.moonrise
    local moon_set = data.astro.moonset
    local sunrise = data.astro.sunrise
    local sunset = data.astro.sunset
-   
+
    if(string.find(self.temp_scale, "C")) then
       avg_temp = data.day.avgtemp_c .. " °C"
       max_temp = data.day.maxtemp_c .. " °C"
@@ -110,7 +110,7 @@ function Composer:createForecastFromDay(data)
    else
       avg_temp = data.day.avgtemp_f .. " °F"
       max_temp = data.day.maxtemp_f .. " °F"
-      min_temp = data.day.mintemp_f .. " °F"      
+      min_temp = data.day.mintemp_f .. " °F"
    end
 
    -- Set and order the data
@@ -146,13 +146,13 @@ function Composer:createForecastFromDay(data)
             "Sunset", sunset
          },
          "---"
-      }      
-   
+      }
+
    return view_content
-   
+
 end
 ---
---- 
+---
 ---
 function Composer:hourlyView(data, callback)
    local view_content = {}
@@ -161,7 +161,7 @@ function Composer:hourlyView(data, callback)
    -- I'm starting the view at 7AM, because no reasonable person should be
    -- up before this time... Kidding! I'm starting at 7AM because *most*
    -- reasonable people are not up before this time :P
-   for i = 7, 20,1 do      
+   for i = 7, 20,1 do
       local cell
       local time
 
@@ -173,7 +173,7 @@ function Composer:hourlyView(data, callback)
 
       if(string.find(self.clock_style, "12")) then
          local meridiem
-         local hour = i  
+         local hour = i
          if(hour <= 12) then
             meridiem = "AM"
          else
@@ -183,7 +183,7 @@ function Composer:hourlyView(data, callback)
          time = hour .. ":00 " .. meridiem
       else
          time = i .. ":00"
-      end         
+      end
 
       table.insert(
          view_content,
@@ -195,13 +195,13 @@ function Composer:hourlyView(data, callback)
             end
          }
       )
-      
+
       table.insert(
          view_content,
          "---"
       )
    end
-   
+
    return view_content
 end
 
@@ -218,7 +218,7 @@ function Composer:forecastForHour(data)
    local gust
    local pressure
    local vis
-   
+
    local humidity = data.humidity .. "%"
    local time = data.time
    local condition = data.condition.text
@@ -246,13 +246,13 @@ function Composer:forecastForHour(data)
      wind = data.wind_mph  .. " mph " .. data.wind_dir
      gust = data.gust_mph  .. " mph"
    end
-   
+
    if(string.find(self.pressure_units,"mb")) then
      pressure = data.pressure_mb .. " mb"
    else
      pressure = data.pressure_in .. " in"
    end
-   
+
    if(string.find(self.distance_units,"km")) then
      vis = data.vis_km .. " km"
    else
@@ -313,7 +313,7 @@ function Composer:forecastForHour(data)
             "UV", uv
          }
       }
-   
+
    return view_content
 end
 --
@@ -323,7 +323,7 @@ function Composer:createWeeklyForecast(data, callback)
    local view_content = {}
 
    local index = 0
-   
+
    for _, r in ipairs(data.forecast.forecastday) do
       local date = r.date
       local condition = r.day.condition.text
@@ -348,8 +348,8 @@ function Composer:createWeeklyForecast(data, callback)
       -- passed back to the callback
       if index == 0 then
          r.current = data.current
-      end              
-      
+      end
+
       local content = {
          {
             date, condition
@@ -371,12 +371,12 @@ function Composer:createWeeklyForecast(data, callback)
          },
          "---"
       }
-      
+
       view_content = Composer:flattenArray(view_content, content)
 
       index = index + 1
    end
-   
+
    return view_content
 end
 --

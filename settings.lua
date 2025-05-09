@@ -15,22 +15,22 @@ function Settings:createAuthDialog(
       input_type = "string",
       description = _("WeatherAPI auth token"),
       buttons = {
-	 {
-	    {
-	       text = _("Cancel"),
-	       callback = function()
-		  UIManager:close(input)
-	       end,
-	    },
-	    {
-	       text = _("Save"),
-	       is_enter_default = true,
-	       callback = callback(input)
-	    },
-	 }
+         {
+            {
+               text = _("Cancel"),
+               callback = function()
+                 UIManager:close(input)
+               end,
+            },
+            {
+               text = _("Save"),
+               is_enter_default = true,
+               callback = callback(input)
+            },
+         }
       },
    }
 
    return input
-   
+
 end
