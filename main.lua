@@ -551,8 +551,10 @@ function Weather:createForecastForHour(data)
    local hour
 
    if(string.find(self.clock_style,"12")) then
-         if(date.hour <= 12) then
+         if(date.hour < 12) then
             hour = date.hour .. ":00 AM"
+         elseif(date.hour == 12) then
+            hour = date.hour .. ":00 PM"
          else
             hour = (date.hour - 12) .. ":00 PM"
          end
