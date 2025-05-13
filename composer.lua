@@ -174,8 +174,11 @@ function Composer:hourlyView(data, callback)
       if(string.find(self.clock_style, "12")) then
          local meridiem
          local hour = i
-         if(hour <= 12) then
+         if(hour < 12) then
             meridiem = "AM"
+         elseif(hour == 12) then
+            meridiem = "PM"
+            hour = 12
          else
             meridiem = "PM"
             hour = hour - 12
