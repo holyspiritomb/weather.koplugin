@@ -476,7 +476,7 @@ function Weather:forecastForDay(data)
    local day
 
    if data.forecast == nil then
-      day = os.date("%a", data.date_epoch)
+      day = os.date("!%a", data.date_epoch)
       local vc_forecast = self.composer:createForecastFromDay(data)
 
       if (data.current ~= nil) then
