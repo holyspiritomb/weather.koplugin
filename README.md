@@ -1,20 +1,26 @@
 # weather.koplugin
-## About 
 
-Did you say weather? Did you say e-reader? Did you say now? Say "welcome" to your new best friend, KOWeather, the lo-fidelity weather app that delivers weather conditions and forecasts to your favorite e-ink device. 
+weather.koplugin is a weather forecast plugin for [KOReader](https://koreader.rocks) on eInk devices.
 
-With weather information provided by [WeatherAPI](https://weatherapi.com), this plugin is sure to give you great guidance on the best times to sit under a tree and read, or when to run home so you can avoid that pesky rain. 
+## About
+Weather information is provided by [WeatherAPI](https://www.weatherapi.com).
 
 ### Features
 - Forecast for current day
 - Forecast for next 2 days
 - Hourly forecast for current day
-- Celsius and Fahrenheit (except it's not yet working!)
+- Temperatures in Celsius or Fahrenheit (working)
 - 24- or 12-hour clock
+
+Unit customization available:
+- Atmospheric pressure in millibars or inches
+- Wind speed in kph or mph
+- Visibility in km or miles
+- Precipitation amount in mm or inches
 
 ### Customization
 
-Have it your way. This plugin lets you set the forecast location by postal code. Whoa!
+A settings file naned `weather.lua` is created on first run under `.adds/koreader/settings`. Settings can be altered manually in this file if desired.
 
 ### Screenshots
 
@@ -25,15 +31,15 @@ Have it your way. This plugin lets you set the forecast location by postal code.
 
 ### Compatibility
 
-Tested with the Kobo Libra H2O. Other devices unknown. Feel encouraged to try this plugin on your device. If it does or doesn't work, our elves would love to know.
+Devices confirmed working:
+- Kobo Libra H20 (original dev roygbyte's device)
+- Kobo Clara Colour (holyspiritomb's device)
 
 ## Installation
 
-Easy as pie. 
-
 ### Drag and Drop
 
-Download the latest release and unzip it to your computer and then transfer the folder to your KOReader-powered device, placing it under `/.adds/koreader/plugins/weather.koplugin`.
+Download the latest release and unzip it to your computer and then transfer the folder to your KOReader-powered device, placing it under `.adds/koreader/plugins/weather.koplugin`.
 
 ### SSH/SCP
 
